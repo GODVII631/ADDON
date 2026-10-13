@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Addon Inspector · ตรวจ player.json และ Export</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Prompt:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#04060c;--pn:#0b1630;--pn2:#11224a;--ln:#1b2e57;--ln2:#2b4a8f;--tx:#e8efff;--mu:#8fa3cc;--ac:#4d8dff;--ac2:#8fbaff;--bp:#22d3ee;--rp:#5b9bff;--r3:#ff6b81;--r2:#fbbf24;--r1:#60a5fa;--r0:#4ade80;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 80px)}
+*{box-sizing:border-box}
+body{margin:0;color:var(--tx);font:16px/1.55 "IBM Plex Sans Thai","Prompt","Noto Sans Thai",system-ui,sans-serif;background:radial-gradient(64rem 28rem at 50% -14%,#123577,transparent 64%),var(--ink);min-height:100vh}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(rgba(90,150,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(90,150,255,.06) 1px,transparent 1px);background-size:44px 44px;-webkit-mask-image:linear-gradient(#000,transparent 60%);mask-image:linear-gradient(#000,transparent 60%)}
+main{position:relative;max-width:1120px;margin:0 auto;padding:24px 16px 56px}
+.top{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:center;justify-content:space-between;padding:8px 0 14px}
+.brand{display:flex;gap:14px;align-items:center}
+.lg{width:48px;height:48px;border-radius:14px;border:1px solid var(--ln2);background:var(--pn);display:grid;place-items:center;color:var(--ac2);flex:none}
+.lg svg{width:26px;height:26px}
+h1{margin:0;font:700 clamp(1.6rem,4.6vw,2.3rem)/1.15 "Prompt","IBM Plex Sans Thai",sans-serif;letter-spacing:-.01em}
+.brand p{margin:4px 0 0;color:var(--mu);font-size:.95rem}
+.hs{display:flex;gap:10px}
+.hs div{min-width:96px;padding:8px 14px;border:1px solid var(--ln);border-radius:12px;background:var(--pn)}
+.hs b{display:block;font:700 1.5rem/1.1 "Prompt",sans-serif}
+.hs span{font-size:.8rem;color:var(--mu)}
+.hs .hot{border-color:color-mix(in srgb,var(--r3) 55%,transparent)}.hs .hot b{color:var(--r3)}
+h2{display:flex;gap:10px;align-items:center;font:600 1.05rem/1.3 "Prompt","IBM Plex Sans Thai",sans-serif;margin:22px 0 10px}
+.n{width:26px;height:26px;border-radius:50%;border:1px solid var(--ac);color:var(--ac2);display:grid;place-items:center;font-size:.85rem}
+.dz{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;border:1.5px dashed var(--ln2);border-radius:18px;background:linear-gradient(180deg,rgba(17,34,74,.55),rgba(11,22,48,.55));padding:20px;cursor:pointer;transition:border-color .2s,background .2s,box-shadow .2s}
+.dz:hover,.dz.on{border-color:var(--ac);background:rgba(17,34,74,.9)}
+.dz.on{box-shadow:0 0 0 4px rgba(77,141,255,.18)}
+.up{width:56px;height:56px;border-radius:16px;background:var(--ac);color:#04122e;display:grid;place-items:center;flex:none}
+.up svg{width:28px;height:28px}
+.dz .tx{flex:1;min-width:200px}
+.dz b{display:block;font:600 1.1rem "Prompt","IBM Plex Sans Thai",sans-serif}
+.dz small{color:var(--mu);font-size:.9rem}
+.ext{display:flex;flex-wrap:wrap;gap:6px}
+.ext span{font:.8rem ui-monospace,monospace;border:1px solid var(--ln);border-radius:8px;padding:2px 10px;color:var(--mu);background:var(--pn)}
+#st{color:var(--mu);font-size:.88rem;margin-top:10px;min-height:1.3em;word-break:break-word}
+.panel{border:1px solid var(--ln);border-radius:18px;background:rgba(8,16,36,.82)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--ln);background:rgba(6,12,28,.95);backdrop-filter:blur(12px);border-radius:18px 18px 0 0}
+.ttl{display:flex;gap:10px;align-items:center;font:600 1.05rem "Prompt","IBM Plex Sans Thai",sans-serif}
+.cnt{background:var(--ac);color:#04122e;border-radius:99px;min-width:28px;text-align:center;padding:0 10px;font-size:.9rem;font-weight:600}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;color:inherit;transition:transform .15s,background .15s,border-color .15s,color .15s}
+button:active{transform:scale(.97)}
+.bt{display:inline-flex;gap:8px;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--ln2);background:var(--pn2)}
+.bt svg{width:18px;height:18px}
+.bt.d{border-color:color-mix(in srgb,var(--r3) 55%,transparent);color:var(--r3);background:transparent}
+.bt.p{background:var(--ac);border-color:var(--ac);color:#04122e;font-weight:600}
+.bt.p:hover:not(:disabled){background:var(--ac2)}
+.bt:disabled{opacity:.4;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--ac2);outline-offset:2px}
+.body{padding:16px}
+.tools{display:flex;flex-wrap:wrap;gap:10px}
+input[type=search],.sel,.pos{min-height:44px;border-radius:12px;border:1px solid var(--ln);background:var(--pn);color:var(--tx);font:inherit;padding:0 14px}
+input[type=search]{flex:1;min-width:200px}
+.sel{min-width:190px}.sel option{background:#0b1630}
+input::placeholder{color:var(--mu)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.chip{min-height:36px;border:1px solid var(--ln);background:var(--pn);border-radius:99px;padding:0 14px;font-size:.85rem;color:var(--mu)}
+.chip:hover{border-color:var(--ac)}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#04122e;font-weight:600}
+.warn{display:flex;gap:10px;align-items:flex-start;border:1px solid color-mix(in srgb,var(--r3) 45%,transparent);border-left:4px solid var(--r3);border-radius:12px;padding:10px 14px;margin:0 0 14px;font-size:.9rem;background:color-mix(in srgb,var(--r3) 8%,var(--pn))}
+.warn svg{flex:none;width:20px;height:20px;color:var(--r3);margin-top:2px}
+.board{display:grid;grid-template-columns:1fr;gap:22px;align-items:start}
+@media(min-width:900px){.board{grid-template-columns:1fr 1fr}}
+.col{min-width:0}
+.BP{--k:var(--bp)}.RP{--k:var(--rp)}
+.grp{display:flex;gap:10px;justify-content:space-between;align-items:flex-end;padding:0 2px 8px;margin-bottom:12px;border-bottom:2px solid var(--k)}
+.grp b{display:block;font:600 1.05rem "Prompt","IBM Plex Sans Thai",sans-serif;color:var(--k)}
+.grp small{color:var(--mu);font-size:.8rem}
+.grp i{font-style:normal;border:1px solid var(--ln);border-radius:99px;padding:0 11px;font-size:.88rem;color:var(--mu);background:var(--pn)}
+.pk{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:start;background:var(--pn);border:1px solid var(--ln);border-left:4px solid var(--k);border-radius:14px;padding:10px 12px 10px 4px;margin-bottom:10px;transition:box-shadow .12s,opacity .12s}
+.pk.drag{opacity:.45;border-color:var(--ac)}
+.ins-b{box-shadow:0 -5px 0 -1px var(--ac2)}.ins-a{box-shadow:0 5px 0 -1px var(--ac2)}
+.hd{width:34px;height:48px;border:0;background:transparent;color:var(--mu);cursor:grab;touch-action:none;display:grid;place-items:center;border-radius:8px}
+.hd svg{width:20px;height:20px}
+.hd:hover{color:var(--ac2);background:var(--pn2)}
+.pk.drag .hd{cursor:grabbing}
+.ic{width:48px;height:48px;border-radius:12px;background:#0d1a36;color:#fff;display:grid;place-items:center;font-weight:700;font-size:1.3rem;object-fit:cover;border:1px solid var(--ln)}
+.bd{min-width:0}
+.bd h3{margin:0 0 6px;font:600 1rem/1.35 "Prompt","IBM Plex Sans Thai",sans-serif;word-break:break-word}
+.rw{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.b{display:inline-flex;gap:5px;align-items:center;font-size:.78rem;border:1px solid var(--ln);border-radius:99px;padding:1px 10px;color:var(--mu);background:var(--pn2)}
+.b svg{width:13px;height:13px}
+.b.l{color:#06101f;border:0;background:var(--c);font-weight:600;cursor:pointer;padding:4px 12px}
+.l3{--c:var(--r3)}.l2{--c:var(--r2)}.l1{--c:var(--r1)}.l0{--c:var(--r0)}
+.ds{color:var(--mu);font-size:.86rem;margin:8px 0 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ev{margin-top:10px;font-size:.82rem;border-top:1px dashed var(--ln2);padding-top:8px;animation:o .2s ease-out}
+@keyframes o{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.ev code{background:var(--pn2);border:1px solid var(--ln);border-radius:6px;padding:0 6px;word-break:break-all}
+.act{display:flex;gap:8px;align-items:center;margin-top:10px}
+.act label{font-size:.82rem;color:var(--mu)}
+.pos{width:64px;padding:0 6px;text-align:center}
+.ib{width:44px;height:44px;border-radius:12px;border:1px solid var(--ln);background:var(--pn2);color:var(--mu);display:grid;place-items:center}
+.ib svg{width:18px;height:18px}
+.ib:hover{color:var(--ac2);border-color:var(--ac)}
+.ib.x{margin-left:auto}.ib.x:hover{color:var(--r3);border-color:var(--r3)}
+.em{grid-column:1/-1;color:var(--mu);text-align:center;padding:26px 12px;border:1px dashed var(--ln2);border-radius:14px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media(max-width:560px){.hs{width:100%}.hs div{flex:1;min-width:0}.btns{width:100%}.btns .bt{flex:1}.ic{width:40px;height:40px}.sel{flex:1}}
+</style>
+</head>
+<body>
+<main>
+<header class="top"><div class="brand"><span class="lg" id="lg"></span><div><h1>Addon Inspector</h1><p>ตรวจ player.json · จัดลำดับ · Export แอดออน Bedrock เป็น ZIP</p></div></div><div class="hs" id="hs"></div></header>
+<h2><span class="n">1</span>อัพโหลดไฟล์ Addon</h2>
+<div class="dz" id="dz" tabindex="0" role="button" aria-label="อัพโหลดไฟล์ addon"><span class="up" id="up"></span><div class="tx"><b>ลากและวางไฟล์ addon</b><small>หรือคลิกเพื่อเลือกไฟล์ (รองรับหลายไฟล์)</small></div><div class="ext"><span>.mcpack</span><span>.mcaddon</span><span>.zip</span><span>.tar.gz</span></div></div>
+<input type="file" id="fi" multiple hidden accept=".mcpack,.mcaddon,.zip,.gz,.tgz,.tar">
+<div id="st" role="status" aria-live="polite"></div>
+<h2><span class="n">2</span>จัดลำดับและ Export</h2>
+<section class="panel">
+<div class="bar"><div class="ttl">พร้อม Export <span class="cnt" id="cnt">0</span></div><div class="btns"><button class="bt d" id="clr" disabled>ล้างทั้งหมด</button><button class="bt p" id="ex" disabled></button></div></div>
+<div class="body">
+<div class="tools"><input type="search" id="q" placeholder="ค้นหา: ชื่อ / identifier / UUID / ไฟล์ / player.json …" aria-label="ค้นหาแอดออน"><select class="sel" id="so" aria-label="เรียงอัตโนมัติ"><option value="">เรียงอัตโนมัติ…</option><option value="az">ชื่อ ก → ฮ / A → Z</option><option value="za">ชื่อ ฮ → ก / Z → A</option><option value="hi">เสี่ยงสูงก่อน (L3 → L0)</option><option value="lo">เสี่ยงต่ำก่อน (L0 → L3)</option></select></div>
+<div class="chips" id="ch"></div><div id="wn"></div><div class="board" id="out"></div>
+</div></section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+var TD=new TextDecoder(),packs=[],q='',flt=-1,uid=0,armed=0;
+var LN=['ไม่เกี่ยวกับ player','อ้างผู้เล่นผ่าน Molang/Entity','ใช้ผู้เล่นผ่าน Script/Animation','Override player.json'];
+var TL={OVR:'Override ไฟล์ entity ของ minecraft:player (player.json)',SCR:'Script API อ้างผู้เล่น (หรือมีไฟล์ player.js)',ANI:'ไฟล์ animation/controller ที่ชื่อมี "player"',MOL:"Molang อ้าง query.owner_identifier / is_owner_identifier_any = minecraft:player",CLI:"Resource pack override client entity ของ minecraft:player",ENT:'ไฟล์ใน entities/ ที่อ้างถึงผู้เล่น (family "player", filter, entity_types = minecraft:player)',NAM:'ไฟล์ชื่อ player.json ใน entities/ แต่ identifier ไม่ใช่ minecraft:player (ไม่ได้ override จริง ควรตรวจชื่อ)'};
+var STR=/\b(getAllPlayers|getPlayers|getPlayer|player(Spawn|Leave|Join|Interact\w*|BreakBlock|PlaceBlock|GameModeChange|DimensionChange|Emote|InputModeChange|ButtonInput))\b|["']minecraft:player["']|instanceof\s+Player\b|import\s*\{[^}]*\bPlayer\b[^}]*\}\s*from\s*["']@minecraft\/server/;
+var ENR=/"minecraft:player"|"test"\s*:\s*"is_family"[^{}]*"value"\s*:\s*"player"|"value"\s*:\s*"player"[^{}]*"test"\s*:\s*"is_family"|"minecraft:type_family"\s*:\s*\{[^{}]*"player"/;
+var MOL=/owner_identifier\s*==\s*'minecraft:player'|is_owner_identifier_any\s*\([^)]*'minecraft:player'/;
+var ARC=/\.(mcpack|mcaddon|zip|tgz|tar\.gz)$/i;
+function pj(t){t=t.replace(/^\uFEFF/,'');try{return JSON.parse(t)}catch(e){try{var o='',i=0,n=t.length,c,q=0;while(i<n){c=t[i];if(q){o+=c;if(c==='\\')o+=t[++i]||'';else if(c==='"')q=0;i++}else if(c==='"'){q=1;o+=c;i++}else if(c==='/'&&t[i+1]==='/'){while(i<n&&t[i]!=='\n')i++}else if(c==='/'&&t[i+1]==='*'){i=t.indexOf('*/',i+2);i=i<0?n:i+2}else{o+=c;i++}}return JSON.parse(o.replace(/,(\s*[}\]])/g,'$1'))}catch(e2){return null}}}
+function untar(u){var out=[],o=0,ln='';function s(a,b){return TD.decode(u.subarray(o+a,o+b)).replace(/\0[\s\S]*$/,'')}
+ while(o+512<=u.length&&u[o]){var n=ln||s(0,100),pre=s(257,263)==='ustar'?s(345,500):'';if(pre&&!ln)n=pre+'/'+n;ln='';var sz=parseInt(s(124,136).trim(),8)||0,t=String.fromCharCode(u[o+156]||48),d=u.slice(o+512,o+512+sz);
+  if(t==='L')ln=TD.decode(d).replace(/\0[\s\S]*$/,'');else if(t==='x'){var m=TD.decode(d).match(/ path=([^\n]*)/);if(m)ln=m[1]}else if(t==='0')out.push({p:n,d:d});o+=512+Math.ceil(sz/512)*512}
+ return out}
+async function expand(u,pre){var out=[];pre=pre||'';
+ if(u[0]===0x1f&&u[1]===0x8b)u=pako.ungzip(u);
+ if(u[0]===0x50&&u[1]===0x4b){var z=await JSZip.loadAsync(u),fs=Object.values(z.files);
+  for(var i=0;i<fs.length;i++){var f=fs[i];if(f.dir)continue;var d=await f.async('uint8array');
+   if(ARC.test(f.name))out.push.apply(out,await expand(d,pre+f.name+'/'));else out.push({p:pre+f.name,d:d})}}
+ else if(u.length>512&&TD.decode(u.subarray(257,262))==='ustar')untar(u).forEach(function(e){out.push({p:pre+e.p,d:e.d})});
+ return out}
+function scan(p){var T={OVR:[],SCR:[],ANI:[],MOL:[],CLI:[],ENT:[],NAM:[]};p.sk=0;
+ p.files.forEach(function(f){var r=f.rel,lo=r.toLowerCase(),b=lo.split('/').pop(),js=/\.(js|mjs|ts)$/.test(lo),jn=lo.slice(-5)==='.json';
+  if(/^player\.(js|mjs|ts)$/.test(b))T.SCR.push(r);
+  if(jn&&b.indexOf('player')>-1&&/(^|\/)(animations|animation_controllers|render_controllers)\//.test(lo))T.ANI.push(r);
+  if(!(js||jn))return;if(f.d.length>3e6){p.sk++;return}var t=TD.decode(f.d);
+  if(jn){if(/(^|\/)(entities|entity)\//.test(lo)){var ob=pj(t),en=ob&&(ob['minecraft:entity']||ob['minecraft:client_entity']),id=en&&en.description&&en.description.identifier,isP=ob?id==='minecraft:player':/"identifier"\s*:\s*"minecraft:player"/.test(t);
+    if(isP)(p.type==='BP'?T.OVR:T.CLI).push(r);
+    else{if(b==='player.json')T.NAM.push(r);if(p.type==='BP'&&ENR.test(t))T.ENT.push(r)}}
+   if(/(^|\/)(animations|animation_controllers|render_controllers)\//.test(lo)&&/"(controller\.(animation|render)|animation)\.player\./.test(t)&&T.ANI.indexOf(r)<0)T.ANI.push(r);
+   if(/(^|\/)(attachables|animations|animation_controllers|render_controllers|entity)\//.test(lo)&&MOL.test(t))T.MOL.push(r);
+   if(/(^|\/)(entities|items|attachables|blocks)\//.test(lo)&&p.ids.length<30){var m=t.match(/"identifier"\s*:\s*"([^"]+)"/);if(m)p.ids.push(m[1])}}
+  else if(STR.test(t))T.SCR.push(r)});
+ p.tg=Object.keys(T).filter(function(k){return T[k].length}).map(function(k){return[k,T[k]]});
+ p.lv=T.OVR.length?3:(T.SCR.length||T.ANI.length||T.CLI.length)?2:(T.MOL.length||T.ENT.length||T.NAM.length)?1:0;
+ p.h=[p.name,p.desc,p.src,p.uuid,p.ids.join(' '),['',' player.json override entity',' script animation',' molang attachable'][p.lv],p.tg.map(function(t){return t[1].join(' ')}).join(' ')].join(' ').toLowerCase()}
+function va(v){if(Array.isArray(v))return v.slice(0,3).map(function(x){return+x||0});var m=String(v||'').match(/^(\d+)\.(\d+)\.(\d+)/);return m?[+m[1],+m[2],+m[3]]:[1,0,0]}
+function fv(v){return Array.isArray(v)?v.join('.'):String(v||'')}
+function lk(fs,k){if(!/^pack\./.test(k))return k;var l=fs.filter(function(f){return /^texts\/[^/]*\.lang$/i.test(f.rel)}).sort(function(a,b){return /en_US/.test(b.rel)-/en_US/.test(a.rel)})[0];if(l){var m=TD.decode(l.d).match(new RegExp('^'+k.replace(/\./g,'\\.')+'=(.*)$','m'));if(m)return m[1].replace(/\t#.*$/,'').trim()}return k}
+function cl(s){return s.replace(/§./g,'').trim()||'(ไม่มีชื่อ)'}
+function dc(s){return /^pack\./.test(s)?'':s.replace(/§./g,'').trim()}
+function mk(x,files,src){var h=x.m.header,mods=(Array.isArray(x.m.modules)?x.m.modules:[]).map(function(m){return m&&m.type});
+ var type=mods.indexOf('resources')>-1||mods.indexOf('skin_pack')>-1?'RP':'BP',name=cl(lk(files,String(h.name||'(ไม่มีชื่อ)')));
+ var ic=files.filter(function(f){return /^pack_icon\.(png|jpe?g|webp)$/i.test(f.rel)})[0]||files.filter(function(f){return /^[^/]*icon[^/]*\.(png|jpe?g|webp)$/i.test(f.rel)})[0];
+ var p={id:++uid,type:type,name:name,ver:h.version,uuid:h.uuid,desc:typeof h.description==='string'?dc(lk(files,h.description)):'',dep:(Array.isArray(x.m.dependencies)?x.m.dependencies:[]).filter(function(d){return d&&d.uuid}).map(function(d){return String(d.uuid).toLowerCase()}),sk:0,src:src,files:files,ids:[],open:0,
+  icon:ic?d2u(ic):''};scan(p);return p}
+function d2u(f){var d=f.d,s='',i,m=/\.jpe?g$/i.test(f.rel)?'image/jpeg':/\.webp$/i.test(f.rel)?'image/webp':'image/png';for(i=0;i<d.length;i+=8192)s+=String.fromCharCode.apply(null,d.subarray(i,i+8192));return'data:'+m+';base64,'+btoa(s)}
+var mb=0,UU=/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
+function np(p){return p.replace(/\\/g,'/').split('/').filter(function(s){return s&&s!=='.'&&s!=='..'}).join('/')}
+function build(ents,fname){ents=ents.map(function(e){return{p:np(e.p),d:e.d}}).filter(function(e){return e.p&&!/(^|\/)__MACOSX\//.test(e.p)});
+ var am=ents.filter(function(e){return /(^|\/)manifest\.json$/.test(e.p)}).map(function(e){return{root:e.p.slice(0,e.p.length-13),m:pj(TD.decode(e.d))}}),ms=am.filter(function(x){return x.m&&x.m.header&&UU.test(String(x.m.header.uuid))});mb=am.length-ms.length;
+ var roots=ms.map(function(x){return x.root});
+ return ms.map(function(x){var files=ents.filter(function(e){return e.p.indexOf(x.root)===0&&!roots.some(function(r){return r.length>x.root.length&&e.p.indexOf(r)===0})}).map(function(e){return{rel:e.p.slice(x.root.length),d:e.d}});
+  var s=x.root.match(/([^\/]+\.(mcaddon|mcpack|zip|tgz|tar\.gz))\//gi);return mk(x,files,s?s[s.length-1].replace(/\/$/,''):fname)})}
+async function handle(list){var add=0,skip=0,bad=[];
+ for(var i=0;i<list.length;i++){var f=list[i];$('#st').textContent='กำลังอ่าน '+f.name+' ('+(i+1)+'/'+list.length+')…';
+  try{var u=new Uint8Array(await f.arrayBuffer()),ps=build(await expand(u),f.name);if(mb)bad.push(f.name+' (manifest.json อ่านไม่ได้หรือ UUID ไม่ถูกต้อง '+mb+' ไฟล์)');else if(!ps.length)bad.push(f.name+' (ไม่พบ manifest.json)');
+   ps.forEach(function(p){if(packs.some(function(o){return o.uuid===p.uuid&&o.type===p.type&&fv(o.ver)===fv(p.ver)}))skip++;else{packs.push(p);add++}})}
+  catch(e){bad.push(f.name+' ('+(e.message||e)+')')}}
+ $('#st').textContent='เพิ่ม '+add+' แพ็ก'+(skip?' · ข้ามที่ซ้ำ '+skip:'')+(bad.length?' · อ่านไม่ได้: '+bad.join(', '):'');render()}
+function vis(p){var ws=q.toLowerCase().split(/\s+/).filter(Boolean);
+ return(flt<0||(flt===3?p.lv===3:flt===1?p.lv>0:p.lv===0))&&ws.every(function(w){return p.h.indexOf(w)>-1})}
+var S=function(d,f){return'<svg viewBox="0 0 20 20" fill="'+(f||'none')+'" stroke="'+(f?'none':'currentColor')+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>'};
+var G={grip:S('<circle cx="7.5" cy="5" r="1.5"/><circle cx="12.5" cy="5" r="1.5"/><circle cx="7.5" cy="10" r="1.5"/><circle cx="12.5" cy="10" r="1.5"/><circle cx="7.5" cy="15" r="1.5"/><circle cx="12.5" cy="15" r="1.5"/>','currentColor'),
+ up:S('<path d="M5 12l5-5 5 5"/>'),dn:S('<path d="M5 8l5 5 5-5"/>'),x:S('<path d="M5 5l10 10M15 5L5 15"/>'),
+ fold:S('<path d="M2.5 6.5A1.5 1.5 0 014 5h3l1.6 2H16a1.5 1.5 0 011.5 1.5V14A1.5 1.5 0 0116 15.5H4A1.5 1.5 0 012.5 14z"/>'),
+ alert:S('<path d="M10 3l8 14H2z"/><path d="M10 8v4M10 14.5v.1"/>'),ul:S('<path d="M10 14V4M6 8l4-4 4 4M4 16h12"/>'),dl:S('<path d="M10 4v10M6 10l4 4 4-4M4 16h12"/>'),
+ logo:S('<path d="M10 2.5l7.5 4-7.5 4-7.5-4z"/><path d="M2.5 10l7.5 4 7.5-4M2.5 13.5l7.5 4 7.5-4"/>')};
+var EXB=G.dl+'Export ทั้งหมดเป็น ZIP';
+function mark(){document.querySelectorAll('.ins-a,.ins-b').forEach(function(x){x.classList.remove('ins-a','ins-b')})}
+function place(p,tid,aft){var t=packs.filter(function(x){return x.id===tid})[0];if(!t||t===p)return;packs=packs.filter(function(x){return x!==p});packs.splice(packs.indexOf(t)+(aft?1:0),0,p);render()}
+function mov(p,d,sel){var s=packs.filter(function(x){return x.type===p.type&&vis(x)}),n=s[s.indexOf(p)+d];if(!n)return;place(p,n.id,d>0);var f=document.querySelector('.pk[data-id="'+p.id+'"] '+sel);if(f)f.focus()}
+function sortPacks(){var v=$('#so').value;if(!v)return;var nm=function(a,b){return a.name.localeCompare(b.name,'th')},f={az:nm,za:function(a,b){return nm(b,a)},hi:function(a,b){return b.lv-a.lv||nm(a,b)},lo:function(a,b){return a.lv-b.lv||nm(a,b)}}[v];
+ var g=function(t){return packs.filter(function(p){return p.type===t}).sort(f)};packs=g('BP').concat(g('RP'));$('#so').value='';render()}
+function btn(c,h,l,f){var b=el('button',c);b.type='button';b.innerHTML=h;b.title=l;b.setAttribute('aria-label',l);b.onclick=f;return b}
+function card(p,n,tot){var w=el('div','pk '+p.type);w.dataset.id=p.id;
+ var hd=el('button','hd');hd.type='button';hd.innerHTML=G.grip;hd.title='ลากเพื่อย้าย (หรือกดลูกศรขึ้น/ลงบนคีย์บอร์ด)';hd.setAttribute('aria-label','จับเพื่อจัดลำดับ '+p.name);
+ hd.onkeydown=function(e){var d=e.key==='ArrowUp'?-1:e.key==='ArrowDown'?1:0;if(d){e.preventDefault();mov(p,d,'.hd')}};
+ hd.onpointerdown=function(e){if(e.button>0)return;e.preventDefault();hd.setPointerCapture(e.pointerId);w.classList.add('drag');var tg=null,af=0;
+  hd.onpointermove=function(v){if(v.clientY<90)scrollBy(0,-14);else if(v.clientY>innerHeight-90)scrollBy(0,14);
+   var t=document.elementFromPoint(v.clientX,v.clientY),c=t&&t.closest('.pk.'+p.type);mark();
+   if(c&&c!==w){var r=c.getBoundingClientRect();af=v.clientY>r.top+r.height/2;tg=c;c.classList.add(af?'ins-a':'ins-b')}else tg=null};
+  hd.onpointerup=hd.onpointercancel=function(){hd.onpointermove=hd.onpointerup=hd.onpointercancel=null;w.classList.remove('drag');mark();if(tg)place(p,+tg.dataset.id,af)}};
+ var ic;if(p.icon){ic=el('img','ic');ic.alt='';ic.onerror=function(){var f=el('div','ic',p.name.slice(0,1));if(ic.parentNode)ic.replaceWith(f)};ic.src=p.icon}else ic=el('div','ic',p.name.slice(0,1));
+ var bd=el('div','bd');bd.append(el('h3','',p.name));var rw=el('div','rw');rw.append(el('span','b','v'+fv(p.ver)));
+ var lb=el('button','b l l'+p.lv,'L'+p.lv+' · '+LN[p.lv]);lb.type='button';lb.setAttribute('aria-expanded',p.open?'true':'false');lb.onclick=function(){p.open=!p.open;render()};rw.append(lb);
+ if(packs.filter(function(o){return o.uuid===p.uuid}).length>1)rw.append(el('span','b','UUID ซ้ำ'));
+ var sr=el('span','b');sr.innerHTML=G.fold;sr.append(p.src);rw.append(sr);bd.append(rw);if(p.desc)bd.append(el('p','ds',p.desc));
+ if(p.open){var ev=el('div','ev');ev.append(el('div','','UUID: '+p.uuid+' · ไฟล์ '+p.files.length));
+  if(!p.tg.length)ev.append(el('div','','ไม่พบการอ้างถึง player ในแพ็กนี้'));if(p.sk)ev.append(el('div','','⚠ ข้ามไฟล์ใหญ่ >3MB '+p.sk+' ไฟล์ (ไม่ได้สแกน)'));
+  p.tg.forEach(function(t){var g=el('div','');g.append(el('b','',TL[t[0]]),document.createElement('br'));t[1].slice(0,6).forEach(function(r){g.append(el('code','',r),' ')});ev.append(g)});bd.append(ev)}
+ var ps=el('input','pos');ps.type='number';ps.min=1;ps.max=tot;ps.value=n;ps.id='p'+p.id;ps.setAttribute('aria-label','ลำดับของ '+p.name);
+ ps.onchange=function(){var v=Math.max(1,Math.min(tot,parseInt(ps.value,10)||n));ps.value=v;if(v===n)return;var all=packs.filter(function(x){return x.type===p.type});place(p,all[v-1].id,v>n)};
+ ps.onkeydown=function(e){if(e.key==='Enter')ps.blur()};
+ var ac=el('div','act'),lab=el('label','','ลำดับ');lab.htmlFor=ps.id;
+ ac.append(lab,ps,btn('ib u',G.up,'เลื่อนขึ้น',function(){mov(p,-1,'.u')}),btn('ib dn',G.dn,'เลื่อนลง',function(){mov(p,1,'.dn')}),btn('ib x',G.x,'ลบแพ็กนี้',function(){if(p.icon)URL.revokeObjectURL(p.icon);packs=packs.filter(function(o){return o!==p});render()}));
+ bd.append(ac);w.append(hd,ic,bd);return w}
+function render(){var o=$('#out'),cn=function(t){return packs.filter(function(p){return p.type===t}).length},ov=packs.filter(function(p){return p.lv===3});o.textContent='';$('#cnt').textContent=packs.length;
+ $('#hs').innerHTML='<div><b>'+cn('BP')+'</b><span>Behavior</span></div><div><b>'+cn('RP')+'</b><span>Resource</span></div><div'+(ov.length?' class="hot"':'')+'><b>'+ov.length+'</b><span>Override player.json</span></div>';
+ $('#clr').disabled=$('#ex').disabled=$('#so').disabled=!packs.length;$('#clr').textContent='ล้างทั้งหมด';armed=0;
+ var ch=$('#ch');ch.textContent='';[[-1,'ทั้งหมด'],[3,'Override player.json ('+ov.length+')'],[1,'มีการอ้างถึง player'],[0,'ไม่เกี่ยวกับ player']].forEach(function(c){var b=el('button','chip'+(flt===c[0]?' on':''),c[1]);b.type='button';b.onclick=function(){flt=c[0];render()};ch.append(b)});
+ var wn=$('#wn');wn.textContent='';
+ if(ov.length){var m=el('div','warn');m.innerHTML=G.alert;m.append(el('span','','พบ '+ov.length+' แพ็กที่ override player.json: '+ov.map(function(p){return p.name}).join(', ')+(ov.length>1?' — มีมากกว่า 1 ตัว อาจทับกัน (อนุมาน ยังไม่ได้ทดสอบในเกม)':' — ถ้าใช้ร่วมกับแอดออนอื่นที่แก้ player.json อาจทับกัน (อนุมาน)')));wn.append(m)}
+ var dm=[];packs.forEach(function(p){p.dep.forEach(function(u){if(!packs.some(function(x){return String(x.uuid).toLowerCase()===u}))dm.push(p.name+' ต้องการ '+u.slice(0,8)+'…')})});if(dm.length){var m2=el('div','warn');m2.innerHTML=G.alert;m2.append(el('span','','ขาด dependency: '+dm.join(' · ')+' (ไม่นับโมดูล @minecraft/*)'));wn.append(m2)}
+ if(!packs.length){o.append(el('div','em','ยังไม่มีแอดออน — ลากไฟล์ลงในกล่องด้านบนเพื่อเริ่มตรวจสอบ'));return}
+ [['BP','Behavior Packs','world_behavior_packs.json'],['RP','Resource Packs','world_resource_packs.json']].forEach(function(g){
+  var all=packs.filter(function(p){return p.type===g[0]}),l=all.filter(vis),c=el('section','col '+g[0]),h=el('div','grp'),t=el('div');
+  t.append(el('b','',g[1]),el('small','','ลำดับตรงกับ '+g[2]+' ที่ Export'));h.append(t,el('i','',l.length===all.length?all.length:l.length+'/'+all.length));c.append(h);
+  l.forEach(function(p){c.append(card(p,all.indexOf(p)+1,all.length))});
+  if(!l.length)c.append(el('div','em',all.length?'ไม่มีรายการที่ตรงกับตัวกรอง':'ไม่มีแพ็กประเภทนี้'));o.append(c)})}
+function safe(s){return String(s).replace(/[\\\/:*?"<>|\s]+/g,'_').replace(/^_+|_+$/g,'').slice(0,60)||'pack'}
+function saveBlob(blob,fn){var u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fn;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(u)},4000)}
+async function exp(){var b=$('#ex'),z=new JSZip(),used={},bl=[],rl=[];b.disabled=true;
+ try{packs.forEach(function(p){var base=safe(p.name)+'_'+p.type,f=base,i=2;while(used[f])f=base+'_'+i++;used[f]=1;
+   var dir=(p.type==='BP'?'behavior_packs/':'resource_packs/')+f+'/';p.files.forEach(function(e){z.file(dir+e.rel,e.d)});
+   (p.type==='BP'?bl:rl).push({pack_id:p.uuid,version:va(p.ver)})});
+  if(bl.length)z.file('world_behavior_packs.json',JSON.stringify(bl,null,2));if(rl.length)z.file('world_resource_packs.json',JSON.stringify(rl,null,2));
+  var li=function(t){return packs.filter(function(p){return p.type===t}).map(function(p){return'  - '+p.name+' v'+fv(p.ver)}).join('\n')};
+  z.file('README.txt','Bedrock Addon Export\n======================\n\nไฟล์นี้ประกอบด้วย addon ดังต่อไปนี้:\n\nBehavior Packs ('+bl.length+'):\n'+li('BP')+'\n\nResource Packs ('+rl.length+'):\n'+li('RP')+'\n\nคำแนะนำการติดตั้ง:\n==========================\n\n1. แตกไฟล์ zip นี้\n\n2. คัดลอกโฟลเดอร์ไปยังโฟลเดอร์เวิลด์ของคุณ:\n   - คัดลอกโฟลเดอร์ "behavior_packs" ไปยังโฟลเดอร์เวิลด์\n   - คัดลอกโฟลเดอร์ "resource_packs" ไปยังโฟลเดอร์เวิลด์\n\n3. อัพเดตการลงทะเบียน pack:\n   - ถ้าเวิลด์ของคุณมีไฟล์ world_behavior_packs.json หรือ world_resource_packs.json อยู่แล้ว\n     ให้รวมเนื้อหาจากไฟล์นี้เข้ากับไฟล์เหล่านั้น\n   - ถ้าไม่มี ให้คัดลอกไฟล์ JSON ไปยังโฟลเดอร์เวิลด์\n\n4. รีสตาร์ทเซิร์ฟเวอร์หรือโหลดเวิลด์ใหม่\n');
+  var blob=await z.generateAsync({type:'blob',compression:'DEFLATE'},function(m){b.textContent='กำลังสร้าง ZIP '+Math.round(m.percent)+'%'});
+  var ts=new Date().toISOString().replace('T','_').replace(/:/g,'-').slice(0,19),fn='bedrock_addons_export_'+ts+'.zip';
+  var dl=null;try{if(typeof claude!=='undefined'&&claude&&typeof claude.use==='function')dl=await claude.use('downloads')}catch(_){dl=null}
+  if(dl){await dl.save({filename:fn,data:blob})}
+  else{saveBlob(blob,fn)}
+  $('#st').textContent='ส่งออกแล้ว: '+packs.length+' แพ็ก ('+fn+')'}
+ catch(e){$('#st').textContent=e&&e.code==='declined'?'ยกเลิกการบันทึก':'Export ไม่สำเร็จ: '+((e&&e.message)||e)}
+ finally{b.innerHTML=EXB;b.disabled=!packs.length}}
+var dz=$('#dz'),fi=$('#fi');
+dz.onclick=function(){fi.click()};dz.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();fi.click()}};
+dz.ondragover=function(e){e.preventDefault();dz.classList.add('on')};dz.ondragleave=function(){dz.classList.remove('on')};
+dz.ondrop=function(e){e.preventDefault();dz.classList.remove('on');handle(Array.from(e.dataTransfer.files))};
+fi.onchange=function(){var l=Array.from(fi.files);fi.value='';handle(l)};
+$('#q').oninput=function(e){q=e.target.value;render()};
+$('#ex').onclick=exp;$('#so').onchange=sortPacks;$('#lg').innerHTML=G.logo;$('#up').innerHTML=G.ul;$('#ex').innerHTML=EXB;render();
+$('#clr').onclick=function(){if(!armed){armed=1;$('#clr').textContent='กดอีกครั้งเพื่อยืนยัน';setTimeout(function(){if(armed){armed=0;$('#clr').textContent='ล้างทั้งหมด'}},3000);return}packs.forEach(function(o){if(o.icon)URL.revokeObjectURL(o.icon)});packs=[];render();$('#st').textContent=''};
+if(typeof JSZip==='undefined'||typeof pako==='undefined')$('#st').textContent='โหลดไลบรารี ZIP ไม่สำเร็จ — ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต';
+})();
+</script>
+</body>
+</html>
